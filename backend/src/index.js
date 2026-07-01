@@ -9,9 +9,26 @@ const PORT = process.env.PORT || 3001;
 
 // Security middleware
 app.use(helmet());
+
+const ALLOWED_ORIGINS = [
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'https://pulpapp-1776.vercel.app',
+  'https://pulpapp-1776-git-main-jojacale-9173s-projects.vercel.app',
+  process.env.FRONTEND_URL,
+].filter(Boolean);
+
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
-  credentials: true
+  origin: (origin, callback) => {
+    // Permitir requests sin origin (Render health checks, Postman, etc.)
+    if (!origin) return callback(null, true);
+    // Permitir cualquier subdominio de vercel.app
+    if (origin.endsWith('.vercel.app')) return callback(null, true);
+    // Permitir orígenes explícitos de la lista
+    if (ALLOWED_ORIGINS.includes(origin)) return callback(null, true);
+    callback(new Error(`CORS bloqueado: ${origin}`));
+  },
+  credentials: true,
 }));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
