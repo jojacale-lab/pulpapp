@@ -40,7 +40,13 @@ app.use('/api/', limiter);
 app.use('/api/auth/login', authLimiter);
 
 // Health check
-app.get('/health', (req, res) => res.json({ status: 'ok', app: 'PulpApp', version: '1.0.0' }));
+app.get('/health', (req, res) => res.json({
+  status: 'ok',
+  app: 'PulpApp',
+  version: '1.0.0',
+  uptime: Math.floor(process.uptime()),
+  timestamp: new Date().toISOString(),
+}));
 
 // Routes
 app.use('/api/auth', require('./routes/auth'));
